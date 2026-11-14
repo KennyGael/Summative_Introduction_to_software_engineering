@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AcadIQ – Student Academic Progress Tracking</title>
+<style>
+:root{--bg:#f1f5f8;--card:#fff;--ink:#10233a;--mute:#566579;--line:#d9e1e9;--brand:#0f5c6e;--brand-ink:#fff;--good:#1d7a4d;--warn:#a86400;--bad:#b3261e;--soft:#e4f0f3;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1722;--card:#15222f;--ink:#e6edf4;--mute:#9bacbd;--line:#273a4c;--brand:#5cc1d6;--brand-ink:#0d1722;--good:#52c78b;--warn:#f0b44c;--bad:#ff8a7e;--soft:#1b3340;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0d1722;--card:#15222f;--ink:#e6edf4;--mute:#9bacbd;--line:#273a4c;--brand:#5cc1d6;--brand-ink:#0d1722;--good:#52c78b;--warn:#f0b44c;--bad:#ff8a7e;--soft:#1b3340;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.2;margin:0 0 .5rem}
+h1{font-size:2.1rem}h2{font-size:1.3rem}h3{font-size:1.05rem;margin-top:.5rem}
+p{margin:.3rem 0 .7rem}
+.wrap{max-width:1000px;margin:0 auto;padding:1rem}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;padding:.7rem 1rem;background:var(--card);border-bottom:1px solid var(--line)}
+nav{display:flex;gap:.25rem;flex-wrap:wrap;padding:.5rem 1rem;background:var(--card);border-bottom:1px solid var(--line)}
+.logo{font:700 1.3rem Georgia,serif;color:var(--brand)}
+.who{display:flex;gap:.5rem;align-items:center;color:var(--mute);font-size:.9rem;flex-wrap:wrap}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--brand);background:var(--brand);color:var(--brand-ink);padding:.45rem .85rem;border-radius:6px}
+button.ghost{background:transparent;color:var(--brand)}
+.tab{background:transparent;color:var(--ink);border-color:transparent}
+.tab.on{background:var(--soft);color:var(--brand);border-color:var(--brand)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+input,select{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:.4rem .5rem;margin:.15rem 0;max-width:100%}
+td input[type=number]{width:90px}
+.grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));margin-bottom:1rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:1rem;margin-bottom:1rem}
+.grid .card{margin-bottom:0}
+.stats{display:grid;gap:.75rem;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:1rem}
+.stat{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:6px;padding:.6rem .8rem}
+.stat b{display:block;font:700 1.6rem Georgia,serif}.stat span{color:var(--mute);font-size:.85rem}
+.bar{height:10px;background:var(--line);border-radius:5px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--good)}.bar i.low{background:var(--bad)}
+.row{display:grid;grid-template-columns:130px 1fr 48px;gap:.6rem;align-items:center;margin:.5rem 0;font-size:.92rem}
+.alert{border-left:4px solid var(--warn);background:var(--soft);padding:.5rem .7rem;margin:.4rem 0;border-radius:0 6px 6px 0;font-size:.92rem}
+.alert.bad{border-color:var(--bad)}
+.ok{color:var(--good)}.mute{color:var(--mute);font-size:.88rem}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:480px}
+th,td{padding:.45rem .5rem;border-bottom:1px solid var(--line);text-align:left;font-size:.92rem}
+th{color:var(--mute);font-weight:600}
+input.err{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,var(--card))}
+.msg{padding:.6rem .8rem;border-radius:6px;margin-bottom:1rem;border:1px solid var(--line);background:var(--card)}
+.msg.good{border-color:var(--good)}.msg.bad{border-color:var(--bad)}
+.hero{padding:1.5rem 0 1rem}.hero p{max-width:60ch;color:var(--mute)}
+.tag{display:inline-block;padding:.05rem .5rem;border-radius:10px;font-size:.8rem;background:var(--soft);color:var(--brand)}
+svg text{fill:var(--mute);font-size:11px}
+@media print{header.top,nav,.noprint,footer{display:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const $=i=>document.getElementById(i);
+let db,ses=null,view="",act=Date.now();
+const ui={msg:null,subj:null,as:null,q:"",edit:null,conf:null,rs:null,cls:null,date:new Date().toISOString().slice(0,10)};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const mk=(a,s)=>db.marks[a+"-"+s],asm=j=>db.assess.filter(a=>a.sid===j),sub=s=>db.subjects.filter(j=>j.cid===s.cid);
+const cn=id=>(db.classes.find(c=>c.id===id)||{}).name||"-",mean=v=>v.length?Math.round(v.reduce((x,y)=>x+y,0)/v.length):null;
+const sAvg=(s,j)=>mean(asm(j.id).map(a=>mk(a.id,s.id)).filter(x=>x!=null));
+const overall=s=>mean(sub(s).map(j=>sAvg(s,j)).filter(x=>x!=null));
+function attP(s){let p=0,t=0;for(const d in db.att){const v=db.att[d][s.id];if(v){t++;if(v!=="A")p++}}return t?Math.round(p/t*100):null}
+function alerts(s){const a=[];sub(s).forEach(j=>{const v=asm(j.id).map(x=>mk(x.id,s.id)).filter(x=>x!=null),av=sAvg(s,j);
+ if(av!=null&&av<db.cfg.mark)a.push(["bad",`${j.name}: average ${av}% is below the ${db.cfg.mark}% threshold`]);
+ if(v.length>1&&v[v.length-1]-v[v.length-2]<=-8)a.push(["warn",`${j.name}: dropped ${v[v.length-2]-v[v.length-1]} points since the previous test`])});
+ const p=attP(s);if(p!=null&&p<db.cfg.att)a.push(["bad",`Attendance ${p}% is below the ${db.cfg.att}% threshold`]);return a}
+const mySubs=()=>db.subjects.filter(j=>j.tid===ses.tid),can=j=>ses&&ses.role==="teacher"&&j.tid===ses.tid;
+const myStu=()=>{if(ses.role==="admin")return db.students.filter(s=>s.on);const c=mySubs().map(j=>j.cid);return db.students.filter(s=>s.on&&c.includes(s.cid))};
+const opts=(l,sel)=>l.map(o=>`<option value="${o.id}"${o.id===sel?" selected":""}>${esc(o.name)}</option>`).join("");
+const st=(b,l)=>`<div class="stat"><b>${b}</b><span>${l}</span></div>`,bar=a=>`<div class="bar"><i class="${a<db.cfg.mark?"low":""}" style="width:${a}%"></i></div>`;
+const alH=al=>al.length?al.map(x=>`<div class="alert ${x[0]}">${x[1]}</div>`).join("")+`<p class="mute">Alerts are informational. Official results are confirmed by the school.</p>`:`<p class="ok">No alerts.</p>`;
+const atRisk=ss=>{const r=ss.filter(s=>alerts(s).length);return r.length?r.map(s=>`<div class="alert">${esc(s.name)}: ${alerts(s).map(a=>a[1]).join("; ")}</div>`).join(""):`<p class="ok">No students below the current thresholds.</p>`};
+function trend(s){const js=sub(s),n=Math.max(0,...js.map(j=>asm(j.id).length));if(n<2)return`<p class="mute">Trends appear after two assessments.</p>`;
+ const xy=[];for(let i=0;i<n;i++){const v=mean(js.map(j=>{const a=asm(j.id)[i];return a?mk(a.id,s.id):null}).filter(x=>x!=null));if(v!=null)xy.push([40+i*240/(n-1),Math.min(110,Math.max(15,100-(v-30)*1.2)),v,i+1])}
+ return`<svg viewBox="0 0 320 130" width="100%" role="img" aria-label="Overall average per assessment"><polyline fill="none" stroke="var(--brand)" stroke-width="3" points="${xy.map(p=>p[0]+","+p[1]).join(" ")}"/>${xy.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="var(--brand)"/><text x="${p[0]}" y="${p[1]-9}" text-anchor="middle">${p[2]}%</text><text x="${p[0]}" y="124" text-anchor="middle">Test ${p[3]}</text>`).join("")}</svg>`}
+const flash=(t,x)=>{const m=$("msg");m.className="msg "+t;m.textContent=x};
+const done=x=>{ui.msg=["good",x];render()};
+/* views */
+const lg=()=>`<main class="wrap"><div class="hero"><h1>AcadIQ</h1><p>Student academic progress tracking for schools: marks, attendance, trends, and early alerts in one place.</p></div><div class="grid"><div class="card"><h3>The problem</h3><p>Schools record marks and attendance in notebooks, spreadsheets, and separate files, so a student’s progress is hard to see in one place.</p><h3>Why it matters</h3><p>Declining performance is noticed late, often after reports are due, when little time is left to help.</p><h3>The solution</h3><p>One web platform. Teachers record marks and attendance, students see their own progress, and administrators set the thresholds that raise alerts.</p></div>
+<div class="card"><h3>Sign in</h3><div id="msg" role="status"></div><p><label>Username<br><input id="u" autocomplete="username"></label></p><p><label>Password<br><input id="p" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()"></label></p><button onclick="login()">Sign in</button>
+<p class="mute">Demo accounts. Administrator: admin / admin123. Teacher: teacher1 / teach123 (Mathematics, Science) or teacher2 / teach123 (English, History). Student: aline, eric, diane, or jean / learn123.</p></div></div></main>`;
+const dS=()=>{const s=db.students.find(x=>x.id===ses.sid),al=alerts(s),o=overall(s),p=attP(s);
+ return`<h2>Progress for ${esc(s.name)}</h2><div class="stats">${st(o==null?"-":o+"%","Overall average")}${st(p==null?"-":p+"%","Attendance")}${st(al.length,"Open alerts")}</div><div class="grid"><div class="card"><h3>Subjects</h3>${sub(s).map(j=>{const a=sAvg(s,j)??0;return`<div class="row"><span>${j.name}<br><small class="mute">${asm(j.id).map(x=>mk(x.id,s.id)??"-").join(", ")}</small></span>${bar(a)}<b>${a}%</b></div>`}).join("")}</div><div class="card"><h3>Trend</h3>${trend(s)}</div><div class="card"><h3>Alerts</h3>${alH(al)}</div></div>`};
+const dT=()=>`<h2>Class performance</h2><div class="card scroll"><table><tr><th>Subject</th><th>Class</th><th>Assessments</th><th>Class average</th><th>Below ${db.cfg.mark}%</th></tr>${mySubs().map(j=>{const av=db.students.filter(s=>s.on&&s.cid===j.cid).map(s=>sAvg(s,j)).filter(x=>x!=null);return`<tr><td>${esc(j.name)}</td><td>${cn(j.cid)}</td><td>${asm(j.id).length}</td><td>${av.length?mean(av)+"%":"-"}</td><td>${av.filter(x=>x<db.cfg.mark).length}</td></tr>`}).join("")}</table></div><div class="card"><h3>Students with alerts</h3>${atRisk(myStu())}</div>`;
+const dA=()=>{const ss=myStu();return`<h2>School overview</h2><div class="stats">${st(ss.length,"Active students")}${st((mean(ss.map(overall).filter(x=>x!=null))??"-")+"%","School average")}${st(ss.filter(s=>alerts(s).length).length,"Students with alerts")}${st(db.subjects.length,"Subjects")}</div><div class="grid"><div class="card"><h3>Alert thresholds</h3><p><label>Minimum subject average (%)<br><input type="number" id="thm" value="${db.cfg.mark}"></label></p><p><label>Minimum attendance (%)<br><input type="number" id="tha" value="${db.cfg.att}"></label></p><button onclick="saveTH()">Save thresholds</button></div><div class="card"><h3>Students needing attention</h3>${atRisk(ss)}</div></div>`};
+const mV=()=>{const js=mySubs();if(!js.length)return`<p>No subjects are assigned to you.</p>`;
+ if(!js.some(j=>j.id===ui.subj))ui.subj=js[0].id;const j=js.find(x=>x.id===ui.subj),as=asm(j.id);if(!as.some(a=>a.id===ui.as))ui.as=as.length?as[as.length-1].id:null;const a=as.find(x=>x.id===ui.as);
+ return`<h2>Marks entry</h2><div class="card"><p><label>Subject <select onchange="ui.subj=+this.value;render()">${js.map(x=>`<option value="${x.id}"${x.id===j.id?" selected":""}>${esc(x.name)} (${cn(x.cid)})</option>`).join("")}</select></label> ${as.length?`<label>Assessment <select onchange="ui.as=+this.value;render()">${as.map(x=>`<option value="${x.id}"${a&&x.id===a.id?" selected":""}>${esc(x.title)} (max ${x.max})</option>`).join("")}</select></label>`:""}</p><p><input id="nt" placeholder="New assessment title"> <input type="number" id="nm" value="100" min="1" aria-label="Maximum score"> <button class="ghost" onclick="newA()">Create assessment</button></p></div>
+ ${a?`<div class="card scroll"><h3>${esc(a.title)}, out of ${a.max}</h3><table><tr><th>Student</th><th>Score</th></tr>${db.students.filter(s=>s.on&&s.cid===j.cid).map(s=>`<tr><td>${esc(s.name)}</td><td><input type="number" id="m${s.id}" value="${mk(a.id,s.id)??""}" aria-label="Score for ${esc(s.name)}"></td></tr>`).join("")}</table><p><button onclick="saveM()">Save marks</button></p></div>`:`<p class="mute">Create an assessment to start entering marks.</p>`}`};
+const aV=()=>{const cs=[...new Set(mySubs().map(j=>j.cid))];if(!cs.length)return`<p>No classes are assigned to you.</p>`;if(!cs.includes(ui.cls))ui.cls=cs[0];const ss=db.students.filter(s=>s.on&&s.cid===ui.cls),cur=db.att[ui.date]||{};
+ return`<h2>Attendance</h2><div class="card"><p><label>Class <select onchange="ui.cls=+this.value;render()">${cs.map(c=>`<option value="${c}"${c===ui.cls?" selected":""}>${cn(c)}</option>`).join("")}</select></label> <label>Date <input type="date" value="${ui.date}" onchange="ui.date=this.value;render()"></label></p><div class="scroll"><table><tr><th>Student</th><th>Status</th><th>Attendance so far</th></tr>${ss.map(s=>`<tr><td>${esc(s.name)}</td><td><select id="a${s.id}">${[["P","Present"],["L","Late"],["A","Absent"]].map(o=>`<option value="${o[0]}"${(cur[s.id]||"P")===o[0]?" selected":""}>${o[1]}</option>`).join("")}</select></td><td>${attP(s)??"-"}%</td></tr>`).join("")}</table></div><p><button onclick="saveA()">Save attendance</button></p></div>`};
+const sV=()=>{const q=ui.q.toLowerCase(),cl=ses.role==="admin"?db.classes:db.classes.filter(c=>mySubs().some(j=>j.cid===c.id)),ss=myStu().filter(s=>s.name.toLowerCase().includes(q));
+ return`<h2>Student records</h2><div class="card"><p><input id="q" placeholder="Search by name" value="${esc(ui.q)}" oninput="sq(this.value)"></p><p><input id="sn" placeholder="New student full name"> <select id="sc">${opts(cl)}</select> <button onclick="addS()">Add student</button></p><p class="mute">Archived records are kept, never permanently deleted.</p></div>
+ <div class="card scroll"><table><tr><th>Name</th><th>Class</th><th>Average</th><th>Attendance</th><th></th></tr>${ss.map(s=>ui.edit===s.id?`<tr><td><input id="en" value="${esc(s.name)}"></td><td><select id="ec">${opts(cl,s.cid)}</select></td><td colspan="2"></td><td><button onclick="updS(${s.id})">Save</button> <button class="ghost" onclick="ui.edit=null;render()">Cancel</button></td></tr>`:`<tr><td>${esc(s.name)}</td><td>${cn(s.cid)}</td><td>${overall(s)==null?"-":overall(s)+"%"}</td><td>${attP(s)??"-"}%</td><td><button class="ghost" onclick="ui.edit=${s.id};render()">Edit</button> ${ui.conf===s.id?`Archive this record? <button onclick="arch(${s.id})">Yes</button> <button class="ghost" onclick="ui.conf=null;render()">No</button>`:`<button class="ghost" onclick="ui.conf=${s.id};render()">Archive</button>`}</td></tr>`).join("")}</table></div>`};
+const cV=()=>`<h2>Classes and subjects</h2><div class="grid"><div class="card"><h3>Classes</h3>${db.classes.map(c=>`<p>${esc(c.name)} <span class="tag">${db.students.filter(s=>s.on&&s.cid===c.id).length} students</span></p>`).join("")}<p><input id="cnm" placeholder="New class name"> <button onclick="addC()">Add class</button></p><p class="mute">Assign students to a class from the Students tab.</p></div><div class="card"><h3>Add subject</h3><p><input id="sbn" placeholder="Subject name"></p><p><select id="sbc" aria-label="Class">${opts(db.classes)}</select> <select id="sbt" aria-label="Teacher">${opts(db.teachers)}</select></p><button onclick="addJ()">Add subject</button></div></div><div class="card scroll"><table><tr><th>Subject</th><th>Class</th><th>Teacher</th></tr>${db.subjects.map(j=>`<tr><td>${esc(j.name)}</td><td>${cn(j.cid)}</td><td><select onchange="assign(${j.id},+this.value)" aria-label="Teacher for ${esc(j.name)}">${opts(db.teachers,j.tid)}</select></td></tr>`).join("")}</table></div>`;
+const rV=()=>{const ss=ses.role==="student"?[db.students.find(x=>x.id===ses.sid)]:myStu(),s=ss.find(x=>x.id===ui.rs)||ss[0];if(!s)return`<p>No students.</p>`;
+ return`<h2>Academic report</h2>${ss.length>1?`<p class="noprint"><label>Student <select onchange="ui.rs=+this.value;render()">${opts(ss,s.id)}</select></label></p>`:""}<div class="card scroll"><h3>${esc(s.name)}, ${cn(s.cid)}</h3><table><tr><th>Subject</th><th>Scores</th><th>Average</th></tr>${sub(s).map(j=>`<tr><td>${esc(j.name)}</td><td>${asm(j.id).map(a=>(mk(a.id,s.id)??"-")+"/"+a.max).join(", ")}</td><td>${sAvg(s,j)??"-"}%</td></tr>`).join("")}</table><p>Overall average: <b>${overall(s)??"-"}%</b>. Attendance: <b>${attP(s)??"-"}%</b>.</p>${alH(alerts(s))}<p class="mute">Generated ${new Date().toLocaleDateString()}. Official results are subject to school verification.</p></div><p class="noprint"><button onclick="window.print()">Print or save as PDF</button></p>`};
+const uV=()=>`<h2>Audit trail</h2><div class="card scroll">${db.audit.length?`<table><tr><th>Time</th><th>User</th><th>Action</th></tr>${db.audit.map(a=>`<tr><td>${a.t}</td><td>${esc(a.w)}</td><td>${esc(a.x)}</td></tr>`).join("")}</table>`:`<p class="mute">No changes yet. Marks, attendance, records, and settings changes appear here.</p>`}</div>`;
+const NAV={student:[["dash","Dashboard"],["rep","My report"]],teacher:[["dash","Class dashboard"],["marks","Marks"],["att","Attendance"],["stu","Students"],["rep","Reports"]],admin:[["dash","Overview"],["stu","Students"],["cls","Classes and subjects"],["rep","Reports"],["aud","Audit trail"]]};
+const V={dash:()=>ses.role==="student"?dS():ses.role==="teacher"?dT():dA(),marks:mV,att:aV,stu:sV,cls:cV,rep:rV,aud:uV};
+/* server calls */
+async function api(method,url,body){
+ const o={method,headers:{},credentials:"same-origin"};
+ if(body!==undefined){o.headers["Content-Type"]="application/json";o.body=JSON.stringify(body)}
+ let r;try{r=await fetch(url,o)}catch(e){throw new Error("Cannot reach the server. Check that it is running.")}
+ let j={};try{j=await r.json()}catch(e){}
+ if(r.status===401&&ses){ses=null;db=null;ui.msg=["bad","Your session has ended. Please sign in again."];render();throw new Error("")}
+ if(!r.ok)throw new Error(j.error||"Request failed.");
+ return j}
+async function refresh(){const d=await api("GET","/api/data");d.audit=(d.audit||[]).map(a=>({t:new Date(a.at).toLocaleString([],{dateStyle:"short",timeStyle:"short"}),w:a.w,x:a.x}));db=d}
+async function call(method,url,body,ok,after){try{const r=await api(method,url,body);await refresh();if(after)after(r);done(typeof ok==="function"?ok(r):ok)}catch(e){if(e.message)flash("bad",e.message)}}
+/* actions */
+async function login(){try{const r=await api("POST","/api/login",{username:$("u").value.trim(),password:$("p").value});ses=r.user;await refresh();view="";act=Date.now();render()}catch(e){flash("bad",e.message||"Sign-in failed.")}}
+async function out(msg){try{await api("POST","/api/logout")}catch(e){}ses=null;db=null;if(msg)ui.msg=["bad",msg];render()}
+function sq(v){ui.q=v;render();const e=$("q");e.focus();e.setSelectionRange(v.length,v.length)}
+function saveM(){const j=db.subjects.find(x=>x.id===ui.subj),a=db.assess.find(x=>x.id===ui.as),ss=db.students.filter(s=>s.on&&s.cid===j.cid),scores={};let bad=0;
+ ss.forEach(s=>{const e=$("m"+s.id),v=e.value.trim(),n=Number(v),b=v!==""&&(isNaN(n)||n<0||n>a.max);e.classList.toggle("err",b);if(b)bad++;scores[s.id]=v});
+ if(bad)return flash("bad",`Rejected: ${bad} score(s) outside 0 to ${a.max}. Correct the highlighted fields and save again.`);
+ call("POST","/api/marks",{assessmentId:a.id,scores},"Marks saved. Averages, trends, and alerts are updated.")}
+function newA(){const j=db.subjects.find(x=>x.id===ui.subj);call("POST","/api/assessments",{subjectId:j.id,title:$("nt").value,max:$("nm").value},"Assessment created. Enter the scores below.",r=>{ui.as=r.id})}
+function saveA(){const records={};db.students.filter(s=>s.on&&s.cid===ui.cls).forEach(s=>records[s.id]=$("a"+s.id).value);call("POST","/api/attendance",{classId:ui.cls,date:ui.date,records},"Attendance saved.")}
+function addS(){call("POST","/api/students",{name:$("sn").value,classId:+$("sc").value},r=>`Student added. Their login is ${r.username} / learn123.`)}
+function updS(id){call("PUT","/api/students/"+id,{name:$("en").value,classId:+$("ec").value},"Record updated.",()=>{ui.edit=null})}
+function arch(id){ui.conf=null;call("POST","/api/students/"+id+"/archive",{},"Record archived. It is kept in the database.")}
+function addC(){call("POST","/api/classes",{name:$("cnm").value},"Class created.")}
+function addJ(){call("POST","/api/subjects",{name:$("sbn").value,classId:+$("sbc").value,teacherId:+$("sbt").value},"Subject created and assigned.")}
+function assign(j,t){call("PUT","/api/subjects/"+j,{teacherId:t},"Teacher assignment updated.")}
+function saveTH(){call("PUT","/api/config",{mark:$("thm").value,att:$("tha").value},"Thresholds saved. Alerts now use the new values.")}
+function render(){const m=ui.msg;ui.msg=null;let h=`<header class="top"><span class="logo">AcadIQ</span>`;
+ if(ses){const nv=NAV[ses.role];if(!nv.some(n=>n[0]===view))view=nv[0][0];
+  h+=`<span class="who">${esc(ses.name)} (${ses.role}) <button class="ghost" onclick="out()">Sign out</button></span></header><nav>${nv.map(n=>`<button class="tab${n[0]===view?" on":""}" onclick="view='${n[0]}';ui.edit=ui.conf=null;render()">${n[1]}</button>`).join("")}</nav><main class="wrap"><div id="msg" role="status"></div>${V[view]()}</main>`}
+ else h+=`</header>${lg()}`;
+ $("app").innerHTML=h+`<footer class="wrap mute">AcadIQ web application. Data is stored in the server database.</footer>`;
+ if(m)flash(m[0],m[1])}
+(async()=>{try{ses=(await api("GET","/api/me")).user;await refresh()}catch(e){ses=null;db=null}render()})();
+["click","keydown"].forEach(e=>document.addEventListener(e,()=>act=Date.now()));
+setInterval(()=>{if(ses&&Date.now()-act>6e5)out("You were signed out after 10 minutes of inactivity.")},15000);
+</script>
+</body>
+</html>
