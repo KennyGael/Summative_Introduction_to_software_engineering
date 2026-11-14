@@ -8,11 +8,11 @@ AcadIQ is a full-stack web application that helps schools record, monitor, and u
 
 | Item | Link |
 |---|---|
-| Live application | https://summative-introduction-to-software.onrender.com/|
+| Live application | https://summative-introduction-to-software.onrender.com |
 | Demo video | ADD VIDEO LINK |
-| SRS document | https://docs.google.com/document/d/19ZnbykR5ZNfDUptlj-gfLv6aBXo-17yaYQ7Vhoek818/edit?tab=t.0#heading=h.gjdgxs |
+| SRS document | https://github.com/KennyGael/Summative_Introduction_to_software_engineering/blob/main/docs/AcadIQ_SRS.pdf |
 
-> The live application is on a free host that goes to sleep when unused. The first page load can take 30 to 60 seconds. Please wait for the sign-in page to appear.
+> The live application is on a free host. If it has been idle, the first page load can take up to a minute. Please wait for the sign-in page to appear.
 
 ## The problem
 
@@ -73,10 +73,10 @@ You do **not** need to install a database. SQLite is built in through the `sql.j
 
 ### Steps
 
-1. **Get the code.** Either run `git clone https://github.com/KennyGael/acadiq.git`, or click **Code**, then **Download ZIP** on GitHub and unzip it.
+1. **Get the code.** Either run `git clone https://github.com/KennyGael/Summative_Introduction_to_software_engineering.git`, or click **Code**, then **Download ZIP** on GitHub and unzip it.
 2. **Open a terminal in the project folder** (the folder that contains `package.json`).
    ```
-   cd acadiq
+   cd Summative_Introduction_to_software_engineering
    ```
 3. **Install the dependencies:**
    ```
@@ -126,7 +126,7 @@ These steps use Render, which has a free plan.
 
 1. Push this project to a **public** GitHub repository.
 2. Create an account at https://render.com and sign in with GitHub.
-3. Click **New**, then **Web Service**, and select your `acadiq` repository.
+3. Click **New**, then **Web Service**, and select your repository.
 4. Set the following:
    - **Runtime:** Node
    - **Build Command:** `npm install`
@@ -135,18 +135,20 @@ These steps use Render, which has a free plan.
 5. Under **Environment Variables**, add:
    - `NODE_ENV` = `production`
    - `SESSION_SECRET` = any long random text (for example 40 random characters)
-6. Click **Create Web Service** and wait for the deploy to finish. Your public URL appears at the top of the page (for example `https://acadiq.onrender.com`).
+6. Click **Create Web Service** and wait for the deploy to finish. Your public URL appears at the top of the page (for this project: `https://summative-introduction-to-software.onrender.com`).
 
 Notes for the free plan: the service sleeps after about 15 minutes without visits, so open the URL once to wake it before showing or grading it. The database file is reset to the sample data whenever the service restarts or is redeployed.
 
 ## Project structure
 
 ```
-acadiq/
+Summative_Introduction_to_software_engineering/
 ├── server.js        Express server, API, database, authentication, validation, audit
 ├── package.json     Dependencies and scripts
 ├── public/
 │   └── index.html   The user interface
+├── docs/
+│   └── AcadIQ_SRS.pdf   Proposal and SRS document
 ├── test/
 │   └── smoke.js     Automated tests (npm test)
 ├── .gitignore
