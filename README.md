@@ -8,7 +8,7 @@ AcadIQ is a full-stack web application that helps schools record, monitor, and u
 
 | Item | Link |
 |---|---|
-| Live application | https://acadiq-kenny.onrender.com |
+| Live application | https://summative-introduction-to-software.onrender.com/|
 | Demo video | ADD VIDEO LINK |
 | SRS document | https://docs.google.com/document/d/19ZnbykR5ZNfDUptlj-gfLv6aBXo-17yaYQ7Vhoek818/edit?tab=t.0#heading=h.gjdgxs |
 
