@@ -10,7 +10,7 @@ AcadIQ is a full-stack web application that helps schools record, monitor, and u
 |---|---|
 | Live application | https://acadiq-kenny.onrender.com |
 | Demo video | ADD VIDEO LINK |
-| SRS document | ADD SRS LINK |
+| SRS document | https://docs.google.com/document/d/19ZnbykR5ZNfDUptlj-gfLv6aBXo-17yaYQ7Vhoek818/edit?tab=t.0#heading=h.gjdgxs |
 
 > The live application is on a free host that goes to sleep when unused. The first page load can take 30 to 60 seconds. Please wait for the sign-in page to appear.
 
