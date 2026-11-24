@@ -9,7 +9,7 @@ AcadIQ is a full-stack web application that helps schools record, monitor, and u
 | Item | Link |
 |---|---|
 | Live application | https://summative-introduction-to-software.onrender.com |
-| Demo video | ADD VIDEO LINK |
+| Demo video | https://www.youtube.com/watch?v=z7Kd2Hbfn-0 |
 | SRS document | https://github.com/KennyGael/Summative_Introduction_to_software_engineering/blob/main/docs/AcadIQ_SRS.pdf |
 
 > The live application is on a free host. If it has been idle, the first page load can take up to a minute. Please wait for the sign-in page to appear.
